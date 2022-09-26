@@ -1,5 +1,6 @@
 <?php
-class Usuario{
+class Usuario
+{
     //atributos
     private $id;
     private $nome;
@@ -43,7 +44,7 @@ class Usuario{
         return $this->avatar;
     }
 
-  
+
     public function setId($value)
     {
         $this->id = $value;
@@ -77,14 +78,16 @@ class Usuario{
         $this->avatar = $value;
     }
 
-    public function loadById($_id){
+    public function loadById($_id)
+    {
         $sql = new Sql();
-        $results = $sql->select("SELECT * FROM usuarios WHERE id = :id", array(':id'=>$_id));
-        if(count($results)>0){
+        $results = $sql->select("SELECT * FROM usuarios WHERE id = :id", array(':id' => $_id));
+        if (count($results) > 0) {
             $this->setData($results[0]);
         }
     }
-    public function setData($dados){
+    public function setData($dados)
+    {
         $this->setId($dados['id']);
         $this->setNome($dados['nome']);
         $this->setUsuario($dados['usuario']);
@@ -95,43 +98,71 @@ class Usuario{
         $this->setAvatar($dados['avatar']);
     }
 
-    public static function getList(){
+    public static function getList()
+    {
         $sql = new Sql();
         return $sql->select("SELECT * FROM usuarios ORDER BY nome");
     }
-    public static function search($_nome){
+    public static function search($_nome)
+    {
         $sql = new Sql();
-        return $sql->select("SELECT * FROM usuarios WHERE nome LOKE :nome",
-            array(":nome"=>"%".$_nome."%"));
+        return $sql->select(
+            "SELECT * FROM usuarios WHERE nome LOKE :nome",
+            array(":nome" => "%" . $_nome . "%")
+        );
     }
-    public function efetuarLogin($_usuario, $_senha){
+    public function efetuarLogin($_usuario, $_senha)
+    {
         $sql = new Sql();
         $senhaCrip = md5($_senha);
-        $res = $sql->select("SELECT * FROM usuarios WHERE usuario = :usuario and senha= :senha", 
-        array(":usuario"=>$_usuario,":senha"=>$senhaCrip));
-        if(count($res)>0){
+        $res = $sql->select(
+            "SELECT * FROM usuarios WHERE usuario = :usuario and senha= :senha",
+            array(":usuario" => $_usuario, ":senha" => $senhaCrip)
+        );
+        if (count($res) > 0) {
             $this->setData($res[0]);
         }
     }
-    public function insert(){
+    public function insert()
+    {
         $sql = new Sql();
-        $res = $sql->select("CALL sp_user_insert(:nome, :usuario, :senha, :nivel, :avatar)",
-    array(
-        ":nome"=>$this->getNome(),
-        ":usuario"=>$this->getNome(),
-        ":senha"=>md5($this->getSenha()),
-        ":nivel"=>$this->getNivel(),
-        ":avatar"=>$this->getAvatar()
-    ));
-    if(count($res)>0){
-        $this->setData($res[0]);
+        $res = $sql->select(
+            "CALL sp_user_insert(:nome, :usuario, :senha, :nivel, :avatar)",
+            array(
+                ":nome" => $this->getNome(),
+                ":usuario" => $this->getNome(),
+                ":senha" => md5($this->getSenha()),
+                ":nivel" => $this->getNivel(),
+                ":avatar" => $this->getAvatar()
+            )
+        );
+        if (count($res) > 0) {
+            $this->setData($res[0]);
+        }
     }
-    }
-    public function update($_id){}
-    public function delete(){}
-    public function __construct(){
+    public function update(){
+        $sql = new Sql();
+        $sql->query("UPDATE usuarios SET nome= :nome, senha= :senha, nivel= :nivel, 
+        avatar= :avatar WHERE id= :id",
+        array(
+            ":nome" => $this->getNome(),
+            ":id" => $this->getId(),
+            ":senha" => md5($this->getSenha()),
+            ":nivel" => $this->getNivel(),
+            ":avatar" => $this->getAvatar()
 
+        ));
+    }
+    public function delete(){
+        $sql = new Sql();
+        $sql->query("DELETE FROM usuarios WHERE id= :id",array(":id"=>$this->getId()));
+    }
+    public function __construct($_nome="", $_usuario="", $_senha="", $_nivel="", $_ativo="", $_avatar=""){
+        $this->nome =$_nome;
+        $this->usuario =$_usuario;
+        $this->senha =$_senha;
+        $this->nivel =$_nivel;
+        $this->ativo =$_ativo;
+        $this->avatar =$_avatar;
     }
 }
-
-?>
